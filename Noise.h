@@ -7,15 +7,17 @@
 
 using namespace std;
 
+enum NoiseType {ORIGINAL, GAUSSIAN};
+
 class Noise {
 
 private:
 	float ratio;
-	enum {ORIGINAL, GAUSSIAN} type;
+	enum NoiseType type;
 
 public:
 
-	Noise(float ratio);
+	Noise(float ratio, enum NoiseType type);
 	float addNoise(float mean, float range);
 };
 

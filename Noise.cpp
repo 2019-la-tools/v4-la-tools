@@ -1,7 +1,8 @@
 #include "Noise.h"
 
-Noise::Noise(float ratio) {
+Noise::Noise(float ratio, enum NoiseType type) {
 	this->ratio = ratio;
+	this->type = type;
 }
 
 float Noise::addNoise(float mean, float range) {
