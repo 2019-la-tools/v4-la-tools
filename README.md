@@ -32,6 +32,13 @@ In addition, the FD file indicates if factors have numeric levels (useful for co
 Optionally, an empty string ("") can be provided instead of a FD file, and the software will assign all factors and (non-numeric) levels generic names (F0, F1, L0, L1...).
 The seed used for all random samples throughout execution is obtained from the current time and printed immediately after execution begins.
 
+## NOISE
+Usage: `... noise [f | 'gaussian'] ...`
+
+This argument will add Noise to the response data. If a float value f is supplied; the original noise algorithm will be used with range f.
+If the string 'gaussian' is supplied, noise will be added with a standard normal random distribution.
+
+
 ## ANALYSIS
 Usage: `... analysis [ResponsesDirectory] [response_column] [1/0 - perform log on responses] [nTerms] [nModels] [nNewModels]`
 
