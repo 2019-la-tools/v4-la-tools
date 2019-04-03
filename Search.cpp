@@ -24,6 +24,7 @@ WorkSpace *Model::workSpace = NULL;
 
 // loader section
 void loadResponseVector(VectorXf *response, string directory, string column, bool performLog, Noise *noise) {
+	//directory entry
 	struct dirent *dp;
 
 	// open the directory
@@ -60,6 +61,7 @@ void loadResponseVector(VectorXf *response, string directory, string column, boo
 		// go through not hidden files
 		if (dp->d_name[0] != '.') {
 
+			//grab the full path of the file
 			string file = directory + "/" + dp->d_name;
 			cout << "File: \"" << file << "\"" << endl;
 
@@ -135,14 +137,53 @@ void loadResponseVector(VectorXf *response, string directory, string column, boo
 
 	}
 
+	/* IF NOISE IS GAUSSIAN, CALCULATING THE MIN AND MAX RESPONSE
+	 	MAY BE UNNECESSARY. PROPOSED CHANGE BELOW */
+	/*
+	if(noise != NULL){
+		//noise is orignal type
+		if(noise->type == ORIGINAL){
+			// average the responses
+			data = response->getData();
+			float minResponse = data[0] / responseData[0];
+			float maxResponse = data[0] / responseData[0];
+			for (int row_i = 0; row_i < rows; row_i++) {
+				//data / dataCount
+				data[row_i] /= responseData[row_i];
+				//cout << data[row_i] << " from " << responseData[row_i] << " responses " << endl;
+
+				//find the minimum and maxiumum responses
+				if (data[row_i] < minResponse) minResponse = data[row_i];
+				if (data[row_i] > maxResponse) maxResponse = data[row_i];
+			}
+
+			// add noise as necessary
+			float range = maxResponse - minResponse;
+			for (int row_i = 0; row_i < rows; row_i++) {
+				data[row_i] = noise->addNoise(data[row_i], range);
+			}
+		}
+		//noise is gaussian type
+		else if(noise->type == GAUSSIAN){
+			data = response->getData();
+			for (int row_i = 0; row_i < rows; row_i++) {
+				data[row_i] /= responseData[row_i];
+				data[row_i] = noise->addNoise(data[row_i], 0);
+			}
+		}
+	}
+	*/
+
 	// average the responses
 	data = response->getData();
 	float minResponse = data[0] / responseData[0];
 	float maxResponse = data[0] / responseData[0];
 	for (int row_i = 0; row_i < rows; row_i++) {
+		//data / dataCount
 		data[row_i] /= responseData[row_i];
 		//cout << data[row_i] << " from " << responseData[row_i] << " responses " << endl;
 
+		//find the minimum and maxiumum responses
 		if (data[row_i] < minResponse) minResponse = data[row_i];
 		if (data[row_i] > maxResponse) maxResponse = data[row_i];
 	}
@@ -480,6 +521,7 @@ int main(int argc, char **argv) {
 
 	if (argc < 3) {
 		cout << "Usage: " << argv[0] << " [LocatingArray.tsv] ([FactorData.tsv]) ..." << endl;
+		//TODO: Add a --help argument that will detail the extra arguments defined below
 		return 0;
 	}
 
@@ -488,12 +530,23 @@ int main(int argc, char **argv) {
 
 	CSMatrix *matrix = new CSMatrix(array);
 
+	/*List of arguments: memchk, analysis, autofind, fixla, model, mtfixla,
+						 sysfixla, checkla, noise, printcs, reorderrowsla*/
 	for (int arg_i = 3; arg_i < argc; arg_i++) {
 		if (strcmp(argv[arg_i], "memchk") == 0) {
 			int exit;
 			cout << "Check memory and press ENTER" << endl;
 			cin >> exit;
-		} else if (strcmp(argv[arg_i], "analysis") == 0) {
+		}
+
+		/* "analysis" argument expects 6 inputs:
+				responseDir:	string
+				responseCol:	string
+				performLog: 	int [0,1]
+				terms_n:		int
+				models_n:		int
+				newModels_n:	int */
+		else if (strcmp(argv[arg_i], "analysis") == 0) {
 			if (arg_i + 6 < argc) {
 				bool performLog = atoi(argv[arg_i + 3]);
 				int terms_n = atoi(argv[arg_i + 4]);
@@ -513,7 +566,13 @@ int main(int argc, char **argv) {
 				cout << " [ResponsesDirectory] [response_column] [1/0 - perform log on responses] [nTerms] [nModels] [nNewModels]" << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "autofind") == 0) {
+		}
+
+		/* "autofind" argument expects 3 inputs:
+				k: 				int
+				c:				int
+				startRows:		int */
+		else if (strcmp(argv[arg_i], "autofind") == 0) {
 			if (arg_i + 3 < argc) {
 				int k = atoi(argv[arg_i + 1]);
 				int c = atoi(argv[arg_i + 2]);
@@ -527,7 +586,11 @@ int main(int argc, char **argv) {
 				cout << " [k Separation] [c Minimum Count] [Start Rows]" << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "fixla") == 0) {
+		}
+
+		/* "fixla" argument expects 1 input:
+				LAFileToFix:	string */
+		else if (strcmp(argv[arg_i], "fixla") == 0) {
 			if (arg_i + 1 < argc) {
 				matrix->exactFix();
 				array->writeToFile(argv[arg_i + 1]);
@@ -538,7 +601,16 @@ int main(int argc, char **argv) {
 				cout << " [FixedOutputLA.tsv]" << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "model") == 0) {
+		}
+
+		/* "model" argument expects 3 inputs and 2 sub-inputs if the value
+			of the 3rd input argument is >0
+				responseDir: 	string
+				responseCol:	string
+				terms:			int
+					coefficients:	float
+					columns:		int */
+		else if (strcmp(argv[arg_i], "model") == 0) {
 			if (arg_i + 3 < argc) {
 				string responseDir = string(argv[arg_i + 1]);
 				string responseCol = string(argv[arg_i + 2]);
@@ -570,7 +642,14 @@ int main(int argc, char **argv) {
 				cout << " [ResponsesDirectory] [response_column] [Terms] [Term 0 coefficient] [Term 0 column] ..." << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "mtfixla") == 0) {
+		}
+
+		/* "mtfixla" argument expects 4 inputs:
+				k: 				int
+				c:				int
+				totalRows:		int
+				outputFile:		string */
+		else if (strcmp(argv[arg_i], "mtfixla") == 0) {
 			if (arg_i + 4 < argc) {
 				int k = atoi(argv[arg_i + 1]);
 				int c = atoi(argv[arg_i + 2]);
@@ -585,7 +664,15 @@ int main(int argc, char **argv) {
 				cout << " [k Separation] [c Minimum Count] [Total Rows] [FixedOutputLA.tsv]" << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "sysfixla") == 0) {
+		}
+
+		/* "sysfixla" argument expects 5 inputs:
+				k: 				int
+				c:				int
+				initialRows:	int
+				minChunk:		int
+				outputFile:		string */
+		else if (strcmp(argv[arg_i], "sysfixla") == 0) {
 			if (arg_i + 5 < argc) {
 				int k = atoi(argv[arg_i + 1]);
 				int c = atoi(argv[arg_i + 2]);
@@ -601,7 +688,12 @@ int main(int argc, char **argv) {
 				cout << " [k Separation] [c Minimum Count] [Initial Rows] [Minimum Chunk] [FixedOutputLA.tsv]" << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "checkla") == 0) {
+		}
+
+		/* "checkla" argument expects 2 inputs:
+				k: 			int
+				c:			int */
+		else if (strcmp(argv[arg_i], "checkla") == 0) {
 			if (arg_i + 2 < argc) {
 				int k = atoi(argv[arg_i + 1]);
 				int c = atoi(argv[arg_i + 2]);
@@ -614,12 +706,23 @@ int main(int argc, char **argv) {
 				cout << " [k Separation] [c Minimum Count]" << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "noise") == 0) {
+		}
+
+		/* "noise" argument expects 1 input that will either be
+		 	the string "gaussian" or a float value:
+				noiseType:		string ["gaussian",float_value]
+
+			Note: will want to follow this argument up with the
+			"analysis" argument to actually use the noise generated */
+		else if (strcmp(argv[arg_i], "noise") == 0) {
 			if (arg_i + 1 < argc) {
 				if(strcmp(argv[arg_i + 1], "gaussian") == 0)
 				{
 					noise = new Noise(0, GAUSSIAN);
-				} else {
+				}
+				/* If the input string is not "gaussian", then assume it is a
+				   float value and use the ORIGINAL noise generation method*/
+				else {
 					float ratio = atof(argv[arg_i + 1]);
 					noise = new Noise(ratio, ORIGINAL);
 				}
@@ -630,10 +733,19 @@ int main(int argc, char **argv) {
 				cout << " [ratio]" << endl;
 				arg_i = argc;
 			}
-		} else if (strcmp(argv[arg_i], "printcs") == 0) {
+		}
+
+		/* "printcs" argument expects no input */
+		else if (strcmp(argv[arg_i], "printcs") == 0) {
 			cout << "CS Matrix:" << endl;
 			matrix->print();
-		} else if (strcmp(argv[arg_i], "reorderrowsla") == 0) {
+		}
+
+		/* "reorderrowsla" argument expects 3 inputs:
+				k: 				int
+				c:				int
+				outputFile:		string */
+		else if (strcmp(argv[arg_i], "reorderrowsla") == 0) {
 			if (arg_i + 3 < argc) {
 				int k = atoi(argv[arg_i + 1]);
 				int c = atoi(argv[arg_i + 2]);

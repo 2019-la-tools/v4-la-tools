@@ -8,16 +8,20 @@ Noise::Noise(float ratio, enum NoiseType type) {
 float Noise::addNoise(float mean, float range) {
 
 	if(this->type == ORIGINAL){
+		//generates a random value from 0 to 1
 		float noise = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
+		//range is the difference between the max response and the min response
 		float noiseRange = ratio * range;
+		//value can be less than the mean if noise < 0.5
 		float noisy = mean + (noise * noiseRange) - (noiseRange / 2);
 
 		cout << "Range: " << range << ", NoiseRange: " << noiseRange << ", value:noisy: " << mean << "\t" << noisy << endl;
 
 		return noisy;
-	}else if (this->type == GAUSSIAN)
-	{
+	}
+
+	else if (this->type == GAUSSIAN){
 		const double PI = 3.14159265358979323846; //not declared in cmath.
 		float u, v;
 		do{
