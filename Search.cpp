@@ -505,7 +505,6 @@ void createModels(LocatingArray *locatingArray, VectorXf *response, CSMatrix *cs
 }
 
 int main(int argc, char **argv) {
-
 	//LocatingArray *array = new LocatingArray("LA_SMALL.tsv");
 	//FactorData *factorData = new FactorData("Factors_SMALL.tsv");
 	//VectorXf *response = loadResponseVector("responses_SMALL", "Exposure", false);
@@ -516,8 +515,7 @@ int main(int argc, char **argv) {
 	// ./Search LA_LARGE.tsv Factors_LARGE.tsv analysis responses_LARGE Throughput 1 13 50 50
 
 	long long int seed = time(NULL);
-	cout << "Seed:\t" << seed << endl;
-	srand(seed);
+	bool seedSet = false;
 
 	if (argc < 3) {
 		cout << "Usage: " << argv[0] << " [LocatingArray.tsv] ([FactorData.tsv]) ..." << endl;
@@ -531,8 +529,31 @@ int main(int argc, char **argv) {
 	CSMatrix *matrix = new CSMatrix(array);
 
 	/*List of arguments: memchk, analysis, autofind, fixla, model, mtfixla,
-						 sysfixla, checkla, noise, printcs, reorderrowsla*/
+						 sysfixla, checkla, noise, printcs, reorderrowsla, seed*/
 	for (int arg_i = 3; arg_i < argc; arg_i++) {
+		//set seed. 1 argument; seed value.
+
+		if(strcmp(argv[arg_i], "seed") == 0){
+			if(arg_i + 1 < argc)
+			{
+				seed = atoll(argv[arg_i + 1]);
+				srand(seed);
+				cout << "Seed:\t" << seed << endl;
+				seedSet = true;
+			}else{
+				//no seed argument; pick random one.
+				seedSet = false;
+			}
+		}
+
+		//set random seed if argument is not supplied.
+		if(seedSet == false)
+		{
+			srand(seed);
+			cout << "Seed:\t" << seed << endl;
+			seedSet = true;
+		}
+
 		if (strcmp(argv[arg_i], "memchk") == 0) {
 			int exit;
 			cout << "Check memory and press ENTER" << endl;
