@@ -603,13 +603,14 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* "model" argument expects 3 inputs and 2 sub-inputs if the value
-			of the 3rd input argument is >0
+		/* "model" argument expects 3 inputs and n pairs of 2-argument,
+			sub-inputs, if the value of the 3rd input argument is n > 0
 				responseDir: 	string
 				responseCol:	string
 				terms:			int
-					coefficients:	float
-					columns:		int */
+				2-argument sub-inputs:
+					coefficient:	float
+					column:		int */
 		else if (strcmp(argv[arg_i], "model") == 0) {
 			if (arg_i + 3 < argc) {
 				string responseDir = string(argv[arg_i + 1]);
