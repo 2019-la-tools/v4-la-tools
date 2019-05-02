@@ -537,12 +537,6 @@ int main(int argc, char **argv) {
 			if(arg_i + 1 < argc)
 			{
 				seed = atoll(argv[arg_i + 1]);
-				srand(seed);
-				cout << "Seed:\t" << seed << endl;
-				seedSet = true;
-			}else{
-				//no seed argument; pick random one.
-				seedSet = false;
 			}
 		}
 

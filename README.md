@@ -32,6 +32,12 @@ In addition, the FD file indicates if factors have numeric levels (useful for co
 Optionally, an empty string ("") can be provided instead of a FD file, and the software will assign all factors and (non-numeric) levels generic names (F0, F1, L0, L1...).
 The seed used for all random samples throughout execution is obtained from the current time and printed immediately after execution begins.
 
+## SEED
+Usage: `... seed [value] ...`
+Supply this argument first. If applied after, Search will use a random seed.
+This command will set the Seed for Search to `value` if supplied, otherwise a
+random value will be chosen.
+
 ## NOISE
 Usage: `... noise [f | 'gaussian'] ...`
 
