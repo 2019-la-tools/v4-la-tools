@@ -1,0 +1,37 @@
+#!/bin/bash
+
+make
+echo
+
+#configurations
+
+LOCATING_ARRAY="LA/LAtemp1.tsv"
+FACTOR_DATA_FILE="FD/Factors_100_3.tsv"
+
+SEED=1552703374
+
+SEARCH_ARG="model"
+
+RESPONSE_DIR="RE/testResponse1_0"
+RESPONSE_COL="Response"
+
+TERMS=8
+COEFFICIENTS_AND_COLUMNS="(0.1,85);(0.1,42887);(0.1,149);(0.1,64);(0.1,0);(0.1,20869);(0.1,29);(0.1,244)"
+
+#build the coefficients and columns arguments
+SPLIT_TERMS=$(echo $COEFFICIENTS_AND_COLUMNS | tr ";" " ")
+
+i=0
+args=()
+for arg in $SPLIT_TERMS; do
+    no_parenthesis="$(echo "$arg" | sed -e 's/(//' | sed -e 's/)//')"
+    args[$i]="$(echo "$no_parenthesis " | sed -e 's/,/ /')"
+    ((++i))
+done
+
+TERM_ARGS="$(echo -e "${args[@]}" | sed -e 's/[[:space:]]*$//')"
+
+
+#run the search
+echo -e "./Search ${LOCATING_ARRAY} ${FACTOR_DATA_FILE} seed ${SEED} ${SEARCH_ARG} ${RESPONSE_DIR} ${RESPONSE_COL} ${TERMS} ${TERM_ARGS} \n"
+./Search ${LOCATING_ARRAY} ${FACTOR_DATA_FILE} seed ${SEED} ${SEARCH_ARG} ${RESPONSE_DIR} ${RESPONSE_COL} ${TERMS} ${TERM_ARGS}

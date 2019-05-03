@@ -528,21 +528,21 @@ int main(int argc, char **argv) {
 
 	CSMatrix *matrix = new CSMatrix(array);
 
-	/*List of arguments: memchk, analysis, autofind, fixla, model, mtfixla,
+	/*List of arguments: seed, memchk, analysis, autofind, fixla, model, mtfixla,
 						 sysfixla, checkla, noise, printcs, reorderrowsla, seed*/
 	for (int arg_i = 3; arg_i < argc; arg_i++) {
 		//set seed. 1 argument; seed value.
 
-		if(strcmp(argv[arg_i], "seed") == 0){
-			if(arg_i + 1 < argc)
-			{
+		/* "seed" argument expects 1 input:
+				seed:	int */
+		if(strcmp(argv[arg_i], "seed") == 0) {
+			if(arg_i + 1 < argc) {
 				seed = atoll(argv[arg_i + 1]);
 			}
 		}
 
 		//set random seed if argument is not supplied.
-		if(seedSet == false)
-		{
+		if(seedSet == false) {
 			srand(seed);
 			cout << "Seed:\t" << seed << endl;
 			seedSet = true;
